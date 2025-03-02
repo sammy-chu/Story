@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天气穿衣推荐 - 原型设计</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .prototype-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+        
+        .screen {
+            width: 360px;
+            height: 640px;
+            background-color: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .screen-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #666;
+        }
+        
+        .status-bar {
+            height: 24px;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: space-between;
+            padding: 0 15px;
+            align-items: center;
+            font-size: 12px;
+            color: #333;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+        }
+        
+        .header {
+            height: 56px;
+            background-color: transparent;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            font-size: 18px;
+            position: absolute;
+            top: 24px;
+            left: 0;
+            right: 0;
+            z-index: 10;
+        }
+        
+        .content {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .nav-bar {
+            height: 56px;
+            background-color: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .nav-item.active {
+            color: #5E9FFF;
+        }
+        
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+        
+        .btn {
+            background-color: #5E9FFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid #5E9FFF;
+            color: #5E9FFF;
+        }
+        
+        .btn-block {
+            width: 100%;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .weather-bg {
+            height: 240px;
+            background: linear-gradient(to bottom, #5E9FFF, #83B8FF);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding-top: 30px;
+        }
+        
+        .weather-bg.rainy {
+            background: linear-gradient(to bottom, #607D8B, #90A4AE);
+        }
+        
+        .weather-bg.sunny {
+            background: linear-gradient(to bottom, #FF9800, #FFCC80);
+        }
+        
+        .weather-bg.cloudy {
+            background: linear-gradient(to bottom, #78909C, #B0BEC5);
+        }
+        
+        .weather-bg.snowy {
+            background: linear-gradient(to bottom, #78909C, #ECEFF1);
+        }
+        
+        .weather-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .temperature {
+            font-size: 48px;
+            font-weight: 300;
+            margin-bottom: 5px;
+        }
+        
+        .weather-desc {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .weather-details {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        
+        .weather-detail-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .weather-detail-value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .weather-detail-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .clothing-recommendation {
+            padding: 15px;
+            margin-top: -20px;
+            position: relative;
+            z-index: 5;
+        }
+        
+        .clothing-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .clothing-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #f0f0f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #5E9FFF;
+        }
+        
+        .clothing-info {
+            flex: 1;
+        }
+        
+        .clothing-name {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .clothing-desc {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .forecast-day {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .forecast-date {
+            width: 80px;
+        }
+        
+        .forecast-day-name {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .forecast-date-value {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .forecast-weather {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .forecast-icon {
+            font-size: 24px;
+            color: #5E9FFF;
+        }
+        
+        .forecast-temp {
+            width: 80px;
+            text-align: right;
+        }
+        
+        .forecast-temp-range {
+            font-weight: bold;
+        }
+        
+        .outfit-card {
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .outfit-image {
+            height: 180px;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+        
+        .outfit-info {
+            padding: 15px;
+            background-color: white;
+        }
+        
+        .outfit-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .outfit-weather {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .outfit-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .outfit-action {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .wardrobe-category {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            font-weight: bold;
+        }
+        
+        .wardrobe-item {
+            display: flex;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .wardrobe-item-image {
+            width: 60px;
+            height: 60px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+        
+        .wardrobe-item-info {
+            flex: 1;
+        }
+        
+        .wardrobe-item-name {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .wardrobe-item-desc {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .wardrobe-item-actions {
+            color: #666;
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .setting-label {
+            font-size: 16px;
+        }
+        
+        .setting-value {
+            color: #666;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #5E9FFF;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            background-color: white;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px 0;
+            font-size: 14px;
+            color: #666;
+            position: relative;
+        }
+        
+        .tab.active {
+            color: #5E9FFF;
+            font-weight: bold;
+        }
+        
+        .tab.active:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 25%;
+            width: 50%;
+            height: 3px;
+            background-color: #5E9FFF;
+            border-radius: 3px;
+        }
+        
+        .detail-section {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .detail-content {
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 4px 8px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        
+        .tag.active {
+            background-color: #5E9FFF;
+            color: white;
+        }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .empty-state i {
+            font-size: 60px;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        
+        .empty-state-text {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="prototype-container">
+        <!-- 首页/天气与穿衣推荐页 -->
+        <div>
+            <div class="screen-title">首页/天气与穿衣推荐页</div>
+            <div class="screen">
+                <div class="status-bar">
+                    <span>12:30</span>
+                    <div>
+                        <i class="fas fa-wifi"></i>
+                        <i class="fas fa-signal"></i>
+                        <i class="fas fa-battery-three-quarters"></i>
+                    </div>
+                </div>
+                <div class="header">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>北京市</span>
+                        <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                    </div>
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="content">
+                    <div class="weather-bg">
+                        <div class="weather-icon">
+                            <i class="fas fa-cloud-sun"></i>
+                        </div>
+                        <div class="temperature">23°</div>
+                        <div class="weather-desc">多云转晴</div>
+                        <div class="weather-details">
+                            <div class="weather-detail-item">
+                                <div class="weather-detail-value">18°/26°</div>
+                                <div class="weather-detail-label">温度范围</div>
+                            </div>
+                            <div class="weather-detail-item">
+                                <div class="weather-detail-value">10km/h</div>
+                                <div class="weather-detail-label">风速</div>
+                            </div>
+                            <div class="weather-detail-item">
+                                <div class="weather-detail-value">30%</div>
+                                <div class="weather-detail-label">湿度</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="clothing-recommendation">
+                        <div class="card" style="margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                                <span>今日穿衣建议</span>
+                                <span style="font-size: 13px; color: #5E9FFF; font-weight: normal;">查看详情 ></span>
+                            </h3>
+                            <p style="color: #666; margin-bottom: 15px;">今天天气多云转晴，温度适中，建议穿着以下服装：</p>
+                            
+                            <div class="clothing-item" style="padding: 10px 0;">
+                                <div class="clothing-icon">
+                                    <i class="fas fa-tshirt"></i>
+                                </div>
+                                <div class="clothing-info">
+                                    <div class="clothing-name">上衣</div>
+                                    <div class="clothing-desc">轻薄长袖衬衫或T恤</div>
+                                </div>
+                            </div>
+                            
+                            <div class="clothing-item" style="padding: 10px 0;">
+                                <div class="clothing-icon">
+                                    <i class="fas fa-socks"></i>
+                                </div>
+                                <div class="clothing-info">
+                                    <div class="clothing-name">下装</div>
+                                    <div class="clothing-desc">休闲裤或牛仔裤</div>
+                                </div>
+                            </div>
+                            
+                            <div class="clothing-item" style="padding: 10px 0; border-bottom: none;">
+                                <div class="clothing-icon">
+                                    <i class="fas fa-shoe-prints"></i>
+                                </div>
+                                <div class="clothing-info">
+                                    <div class="clothing-name">鞋子</div>
+                                    <div class="clothing-desc">运动鞋或休闲鞋</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3 style="margin-bottom: 15px;">未来天气预报</h3>
+                            
+                            <div class="forecast-day">
+                                <div class="forecast-date">
+                                    <div class="forecast-day-name">明天</div>
+                                    <div class="forecast-date-value">5月15日</div>
+                                </div>
+                                <div class="forecast-weather">
+                                    <div class="forecast-icon">
+                                        <i class="fas fa-sun"></i>
+                                    </div>
+                                    <div>晴天</div>
+                                </div>
+                                <div class="forecast-temp">
+                                    <div class="forecast-temp-range">20°/28°</div>
+                                </div>
+                            </div>
+                            
+                            <div class="forecast-day">
+                                <div class="forecast-date">
+                                    <div class="forecast-day-name">周三</div>
+                                    <div class="forecast-date-value">5月16日</div>
+                                </div>
+                                <div class="forecast-weather">
+                                    <div class="forecast-icon">
+                                        <i class="fas fa-cloud"></i>
+                                    </div>
+                                    <div>多云</div>
+                                </div>
+                                <div class="forecast-temp">
+                                    <div class="forecast-temp-range">19°/25°</div>
+                                </div>
+                            </div>
+                            
+                            <div class="forecast-day" style="border-bottom: none;">
+                                <div class="forecast-date">
+                                    <div class="forecast-day-name">周四</div>
+                                    <div class="forecast-date-value">5月17日</div>
+                                </div>
+                                <div class="forecast-weather">
+                                    <div class="forecast-icon">
+                                        <i class="fas fa-cloud-rain"></i>
+                                    </div>
+                                    <div>小雨</div>
+                                </div>
+                                <div class="forecast-temp">
+                                    <div class="forecast-temp-range">17°/23°</div>
+                                </div>
+                            </div>
+                            
+                            <div style="text-align: center; padding-top: 10px;">
+                                <a href="#" style="color: #5E9FFF; font-size: 14px;">查看更多天气预报</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <div class="nav-item active">
+                        <i class="fas fa-home"></i>
+                        <span>首页</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-tshirt"></i>
+                        <span>衣橱</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-heart"></i>
+                        <span>收藏</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-user"></i>
+                        <span>我的</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 未来天气预报页面 -->
+        <div>
+            <div class="screen-title">未来天气预报页面</div>
+            <div class="screen">
+                <div class="status-bar">
+                    <span>12:30</span>
+                    <div>
+                        <i class="fas fa-wifi"></i>
+                        <i class="fas fa-signal"></i>
+                        <i class="fas fa-battery-three-quarters"></i>
+                    </div>
+                </div>
+                <div class="header" style="background-color: #5E9FFF; position: relative; top: 0;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-arrow-left"></i>
+                        <div>未来天气预报</div>
+                    </div>
+                    <div style="display: flex; gap: 15px;">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                </div>
+                <div class="content" style="padding: 15px;">
+                    <div class="card" style="margin-bottom: 20px;">
+                        <h3 style="margin-bottom: 15px;">今日天气详情</h3>
+                        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                            <div style="flex: 1; text-align: center;">
+                                <div style="font-size: 48px; font-weight: 300;">23°</div>
+                                <div style="color: #666;">体感温度 25°</div>
+                            </div>
+                            <div style="flex: 1; text-align: center;">
+                                <div style="font-size: 36px; color: #5E9FFF;">
+                                    <i class="fas fa-cloud-sun"></i>
+                                </div>
+                                <div style="margin-top: 5px;">多云转晴</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                            <div style="flex: 1; min-width: 120px; background-color: #f8f8f8; padding: 10px; border-radius: 8px; text-align: center;">
+                                <div style="color: #666; font-size: 12px;">湿度</div>
+                                <div style="font-weight: bold; margin-top: 5px;">30%</div>
+                            </div>
+                            <div style="flex: 1; min-width: 120px; background-color: #f8f8f8; padding: 10px; border-radius: 8px; text-align: center;">
+                                <div style="color: #666; font-size: 12px;">风速</div>
+                                <div style="font-weight: bold; margin-top: 5px;">10km/h</div>
+                            </div>
+                            <div style="flex: 1; min-width: 120px; background-color: #f8f8f8; padding: 10px; border-radius: 8px; text-align: center;">
+                                <div style="color: #666; font-size: 12px;">气压</div>
+                                <div style="font-weight: bold; margin-top: 5px;">1013hPa</div>
+                            </div>
+                            <div style="flex: 1; min-width: 120px; background-color: #f8f8f8; padding: 10px; border-radius: 8px; text-align: center;">
+                                <div style="color: #666; font-size: 12px;">能见度</div>
+                                <div style="font-weight: bold; margin-top: 5px;">10km</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+                            <div>
+                                <div style="color: #666; font-size: 12px;">日出</div>
+                                <div style="font-weight: bold;">05:32</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="width: 150px; height: 30px; background-color: #f0f0f0; border-radius: 15px; position: relative; overflow: hidden;">
+                                    <div style="position: absolute; top: 0; left: 0; width: 60%; height: 100%; background: linear-gradient(to right, #FF9800, #FFEB3B);"></div>
+                                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: space-between; padding: 0 10px; align-items: center; font-size: 12px;">
+                                        <i class="fas fa-sun" style="color: #FF9800;"></i>
+                                        <i class="fas fa-moon" style="color: #78909C;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: #666; font-size: 12px;">日落</div>
+                                <div style="font-weight: bold;">19:45</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 style="margin-bottom: 15px;">7天天气预报</h3>
+                        
+                        <div class="forecast-day">
+                            <div class="forecast-date">
+                                <div class="forecast-day-name">今天</div>
+                                <div class="forecast-date-value">5月14日</div>
+                            </div>
+                            <div class="forecast-weather">
+                                <div class="forecast-icon">
+                                    <i class="fas fa-cloud-sun"></i>
+                                </div>
+                                <div>多云转晴</div>
+                            </div>
+                            <div class="forecast-temp">
+                                <div class="forecast-temp-range">18°/26°</div>
+                            </div>
+                        </div>
+                        
+                        <div class="forecast-day">
+                            <div class="forecast-date">
+                                <div class="forecast-day-name">明天</div>
+                                <div class="forecast-date-value">5月15日</div>
+                            </div>
+                            <div class="forecast-weather">
+                                <div class="forecast-icon">
+                                    <i class="fas fa-sun"></i>
+                                </div>
+                                <div>晴天</div>
+                            </div>
+                            <div class="forecast-temp">
+                                <div class="forecast-temp-range">20°/28°</div>
+                            </div>
+                        </div>
+                        
+                        <div class="forecast-day">
+                            <div class="forecast-date">
+                                <div class="forecast-day-name">周三</div>
+                                <div class="forecast-date-value">5月16日</div>
+                            </div>
+                            <div class="forecast-weather">
+                                <div class="forecast-icon">
+                                    <i class="fas fa-cloud"></i>
+                                </div>
+                                <div>多云</div>
+                            </div>
+                            <div class="forecast-temp">
+                                <div class="forecast-temp-range">19°/25°</div>
+                            </div>
+                        </div>
+                        
+                        <div class="forecast-day">
+                            <div class="forecast-date">
+                                <div class="forecast-day-name">周四</div>
+                                <div class="forecast-date-value">5月17日</div>
+                            </div>
+                            <div class="forecast-weather">
+                                <div class="forecast-icon">
+                                    <i class="fas fa-cloud-rain"></i>
+                                </div>
+                                <div>小雨</div>
+                            </div>
+                            <div class="forecast-temp">
+                                <div class="forecast-temp-range">17°/23°</div>
+                            </div>
+                        </div>
+                        
+                        <div class="forecast-day">
+                            <div class="forecast-date">
+                                <div class="forecast-day-name">周五</div>
+                                <div class="forecast-date-value">5月18日</div>
+                            </div>
+                            <div class="forecast-weather">
+                                <div class="forecast-icon">
+                                    <i class="fas fa-cloud-rain"></i>
+                                </div>
+                                <div>阵雨</div>
+                            </div>
+                            <div class="forecast-temp">
+                                <div class="forecast-temp-range">16°/22°</div>
+                            </div>
+                        </div>
+                        
+                        <div class="forecast-day">
+                            <div class="forecast-date">
+                                <div class="forecast-day-name">周六</div>
+                                <div class="forecast-date-value">5月19日</div>
+                            </div>
+                            <div class="forecast-weather">
+                                <div class="forecast-icon">
+                                    <i class="fas fa-cloud"></i>
+                                </div>
+                                <div>多云</div>
+                            </div>
+                            <div class="forecast-temp">
+                                <div class="forecast-temp-range">18°/24°</div>
+                            </div>
+                        </div>
+                        
+                        <div class="forecast-day" style="border-bottom: none;">
+                            <div class="forecast-date">
+                                <div class="forecast-day-name">周日</div>
+                                <div class="forecast-date-value">5月20日</div>
+                            </div>
+                            <div class="forecast-weather">
+                                <div class="forecast-icon">
+                                    <i class="fas fa-sun"></i>
+                                </div>
+                                <div>晴天</div>
+                            </div>
+                            <div class="forecast-temp">
+                                <div class="forecast-temp-range">20°/27°</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 穿衣详细建议页面 -->
+        <div>
+            <div class="screen-title">穿衣详细建议页面</div>
+            <div class="screen">
+                <div class="status-bar">
+                    <span>12:30</span>
+                    <div>
+                        <i class="fas fa-wifi"></i>
+                        <i class="fas fa-signal"></i>
+                        <i class="fas fa-battery-three-quarters"></i>
+                    </div>
+                </div>
+                <div class="header" style="background-color: #5E9FFF; position: relative; top: 0;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-arrow-left"></i>
+                        <div>穿衣建议</div>
+                    </div>
+                    <div style="display: flex; gap: 15px;">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                </div>
+                <div class="content">
+                    <div style="background-color: #5E9FFF; color: white; padding: 15px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <div style="font-size: 16px; margin-bottom: 5px;">今天 · 5月14日</div>
+                                <div style="font-size: 24px; font-weight: bold;">多云转晴 23°</div>
+                            </div>
+                            <div style="font-size: 36px;">
+                                <i class="fas fa-cloud-sun"></i>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 15px; font-size: 13px;">
+                            <div>温度范围: 18°/26°</div>
+                            <div>湿度: 30%</div>
+                            <div>风速: 10km/h</div>
+                        </div>
+                    </div>
+                    
+                    <div class="tabs">
+                        <div class="tab active">穿衣建议</div>
+                        <div class="tab">舒适度</div>
+                        <div class="tab">注意事项</div>
+                    </div>
+                    
+                    <div style="padding: 15px;">
+                        <div class="detail-section">
+                            <div class="detail-title">
+                                <i class="fas fa-temperature-high" style="color: #FF9800;"></i>
+                                温度感受
+                            </div>
+                            <div class="detail-content">
+                                今天温度适中，白天温暖，早晚略凉，建议穿着轻薄长袖衣物，注意温差变化。
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <div class="detail-title">
+                                <i class="fas fa-tshirt" style="color: #5E9FFF;"></i>
+                                上装建议
+                            </div>
+                            <div class="detail-content">
+                                <p style="margin-bottom: 10px;">适合穿着轻薄长袖衬衫、T恤或薄毛衣，可以根据温度变化适当增减。</p>
+                                <div>
+                                    <span class="tag active">长袖T恤</span>
+                                    <span class="tag active">轻薄衬衫</span>
+                                    <span class="tag">薄毛衣</span>
+                                    <span class="tag">开衫</span>
+                                    <span class="tag">轻薄外套</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <div class="detail-title">
+                                <i class="fas fa-socks" style="color: #5E9FFF;"></i>
+                                下装建议
+                            </div>
+                            <div class="detail-content">
+                                <p style="margin-bottom: 10px;">适合穿着休闲裤、牛仔裤或轻薄长裤，舒适透气为主。</p>
+                                <div>
+                                    <span class="tag active">休闲裤</span>
+                                    <span class="tag active">牛仔裤</span>
+                                    <span class="tag">轻薄长裤</span>
+                                    <span class="tag">棉麻裤</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <div class="detail-title">
+                                <i class="fas fa-shoe-prints" style="color: #5E9FFF;"></i>
+                                鞋子建议
+                            </div>
+                            <div class="detail-content">
+                                <p style="margin-bottom: 10px;">适合穿着运动鞋、休闲鞋或帆布鞋，舒适透气。</p>
+                                <div>
+                                    <span class="tag active">运动鞋</span>
+                                    <span class="tag active">休闲鞋</span>
+                                    <span class="tag">帆布鞋</span>
+                                    <span class="tag">乐福鞋</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section" style="border-bottom: none;">
+                            <div class="detail-title">
+                                <i class="fas fa-umbrella" style="color: #5E9FFF;"></i>
+                                配件建议
+                            </div>
+                            <div class="detail-content">
+                                <p style="margin-bottom: 10px;">今天不需要携带雨具，可以准备一副墨镜和防晒霜。</p>
+                                <div>
+                                    <span class="tag active">墨镜</span>
+                                    <span class="tag active">防晒霜</span>
+                                    <span class="tag">帽子</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 衣物管理页面 -->
+        <div>
+            <div class="screen-title">衣物管理页面</div>
+            <div class="screen">
+                <div class="status-bar">
+                    <span>12:30</span>
+                    <div>
+                        <i class="fas fa-wifi"></i>
+                        <i class="fas fa-signal"></i>
+                        <i class="fas fa-battery-three-quarters"></i>
+                    </div>
+                </div>
+                <div class="header" style="background-color: #5E9FFF; position: relative; top: 0;">
+                    <div>我的衣橱</div>
+                    <div style="display: flex; gap: 15px;">
+                        <i class="fas fa-search"></i>
+                        <i class="fas fa-plus"></i>
+                    </div>
+                </div>
+                <div class="content" style="padding: 0;">
+                    <div class="tabs">
+                        <div class="tab active">上装</div>
+                        <div class="tab">下装</div>
+                        <div class="tab">鞋子</div>
+                        <div class="tab">配件</div>
+                    </div>
+                    
+                    <div class="wardrobe-category">
+                        T恤/衬衫 (8)
+                    </div>
+                    
+                    <div class="wardrobe-item">
+                        <div class="wardrobe-item-image">
+                            <i class="fas fa-tshirt"></i>
+                        </div>
+                        <div class="wardrobe-item-info">
+                            <div class="wardrobe-item-name">白色长袖T恤</div>
+                            <div class="wardrobe-item-desc">适合15-25°C，春秋季节</div>
+                        </div>
+                        <div class="wardrobe-item-actions">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="wardrobe-item">
+                        <div class="wardrobe-item-image">
+                            <i class="fas fa-tshirt"></i>
+                        </div>
+                        <div class="wardrobe-item-info">
+                            <div class="wardrobe-item-name">蓝色牛津衬衫</div>
+                            <div class="wardrobe-item-desc">适合15-25°C，商务休闲</div>
+                        </div>
+                        <div class="wardrobe-item-actions">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="wardrobe-item">
+                        <div class="wardrobe-item-image">
+                            <i class="fas fa-tshirt"></i>
+                        </div>
+                        <div class="wardrobe-item-info">
+                            <div class="wardrobe-item-name">灰色短袖T恤</div>
+                            <div class="wardrobe-item-desc">适合20-30°C，夏季日常</div>
+                        </div>
+                        <div class="wardrobe-item-actions">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="wardrobe-category">
+                        外套/毛衣 (5)
+                    </div>
+                    
+                    <div class="wardrobe-item">
+                        <div class="wardrobe-item-image">
+                            <i class="fas fa-tshirt"></i>
+                        </div>
+                        <div class="wardrobe-item-info">
+                            <div class="wardrobe-item-name">黑色轻薄外套</div>
+                            <div class="wardrobe-item-desc">适合15-20°C，防风防雨</div>
+                        </div>
+                        <div class="wardrobe-item-actions">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="wardrobe-item">
+                        <div class="wardrobe-item-image">
+                            <i class="fas fa-tshirt"></i>
+                        </div>
+                        <div class="wardrobe-item-info">
+                            <div class="wardrobe-item-name">米色针织开衫</div>
+                            <div class="wardrobe-item-desc">适合15-22°C，春秋季节</div>
+                        </div>
+                        <div class="wardrobe-item-actions">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 15px; text-align: center;">
+                        <button class="btn btn-outline btn-block">
+                            <i class="fas fa-plus"></i>
+                            添加新衣物
+                        </button>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <div class="nav-item">
+                        <i class="fas fa-home"></i>
+                        <span>首页</span>
+                    </div>
+                    <div class="nav-item active">
+                        <i class="fas fa-tshirt"></i>
+                        <span>衣橱</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-heart"></i>
+                        <span>收藏</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-user"></i>
+                        <span>我的</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 搭配收藏页面 -->
+        <div>
+            <div class="screen-title">搭配收藏页面</div>
+            <div class="screen">
+                <div class="status-bar">
+                    <span>12:30</span>
+                    <div>
+                        <i class="fas fa-wifi"></i>
+                        <i class="fas fa-signal"></i>
+                        <i class="fas fa-battery-three-quarters"></i>
+                    </div>
+                </div>
+                <div class="header" style="background-color: #5E9FFF; position: relative; top: 0;">
+                    <div>我的收藏</div>
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="content" style="padding: 15px;">
+                    <div class="tabs">
+                        <div class="tab active">搭配</div>
+                        <div class="tab">单品</div>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <div class="outfit-card">
+                            <div class="outfit-image">
+                                <i class="fas fa-tshirt" style="font-size: 48px;"></i>
+                                <span style="margin-left: 10px;">搭配预览图</span>
+                            </div>
+                            <div class="outfit-info">
+                                <div class="outfit-name">春季休闲搭配</div>
+                                <div class="outfit-weather">
+                                    <i class="fas fa-cloud-sun"></i>
+                                    <span>适合15-25°C，多云/晴天</span>
+                                </div>
+                                <div class="outfit-actions">
+                                    <div class="outfit-action">
+                                        <i class="fas fa-thumbs-up"></i>
+                                        <span>128</span>
+                                    </div>
+                                    <div class="outfit-action">
+                                        <i class="fas fa-share-alt"></i>
+                                        <span>分享</span>
+                                    </div>
+                                    <div class="outfit-action">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="outfit-card">
+                            <div class="outfit-image">
+                                <i class="fas fa-tshirt" style="font-size: 48px;"></i>
+                                <span style="margin-left: 10px;">搭配预览图</span>
+                            </div>
+                            <div class="outfit-info">
+                                <div class="outfit-name">雨天通勤搭配</div>
+                                <div class="outfit-weather">
+                                    <i class="fas fa-cloud-rain"></i>
+                                    <span>适合15-20°C，雨天</span>
+                                </div>
+                                <div class="outfit-actions">
+                                    <div class="outfit-action">
+                                        <i class="fas fa-thumbs-up"></i>
+                                        <span>86</span>
+                                    </div>
+                                    <div class="outfit-action">
+                                        <i class="fas fa-share-alt"></i>
+                                        <span>分享</span>
+                                    </div>
+                                    <div class="outfit-action">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="outfit-card">
+                            <div class="outfit-image">
+                                <i class="fas fa-tshirt" style="font-size: 48px;"></i>
+                                <span style="margin-left: 10px;">搭配预览图</span>
+                            </div>
+                            <div class="outfit-info">
+                                <div class="outfit-name">夏季清凉搭配</div>
+                                <div class="outfit-weather">
+                                    <i class="fas fa-sun"></i>
+                                    <span>适合25-35°C，晴天/炎热</span>
+                                </div>
+                                <div class="outfit-actions">
+                                    <div class="outfit-action">
+                                        <i class="fas fa-thumbs-up"></i>
+                                        <span>210</span>
+                                    </div>
+                                    <div class="outfit-action">
+                                        <i class="fas fa-share-alt"></i>
+                                        <span>分享</span>
+                                    </div>
+                                    <div class="outfit-action">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <div class="nav-item">
+                        <i class="fas fa-home"></i>
+                        <span>首页</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-tshirt"></i>
+                        <span>衣橱</span>
+                    </div>
+                    <div class="nav-item active">
+                        <i class="fas fa-heart"></i>
+                        <span>收藏</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-user"></i>
+                        <span>我的</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 个人设置页面 -->
+        <div>
+            <div class="screen-title">个人设置页面</div>
+            <div class="screen">
+                <div class="status-bar">
+                    <span>12:30</span>
+                    <div>
+                        <i class="fas fa-wifi"></i>
+                        <i class="fas fa-signal"></i>
+                        <i class="fas fa-battery-three-quarters"></i>
+                    </div>
+                </div>
+                <div class="header" style="background-color: #5E9FFF; position: relative; top: 0;">
+                    <div>个人中心</div>
+                    <i class="fas fa-cog"></i>
+                </div>
+                <div class="content" style="padding: 0;">
+                    <div style="background-color: #5E9FFF; padding: 20px; display: flex; align-items: center; gap: 15px; color: white;">
+                        <div style="width: 70px; height: 70px; background-color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #5E9FFF; font-size: 30px;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">用户名</div>
+                            <div style="font-size: 14px; opacity: 0.8;">查看并编辑个人资料</div>
+                        </div>
+                        <div style="margin-left: auto;">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 15px; background-color: #f8f8f8; font-size: 14px; color: #666;">
+                        个人偏好设置
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-label">穿衣风格</div>
+                        <div class="setting-value">
+                            休闲 <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-label">温度敏感度</div>
+                        <div class="setting-value">
+                            正常 <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-label">默认位置</div>
+                        <div class="setting-value">
+                            北京市 <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 15px; background-color: #f8f8f8; font-size: 14px; color: #666;">
+                        应用设置
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-label">天气通知</div>
+                        <div class="setting-value">
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-label">穿衣提醒</div>
+                        <div class="setting-value">
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-label">温度单位</div>
+                        <div class="setting-value">
+                            摄氏度 <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-label">语言</div>
+                        <div class="setting-value">
+                            简体中文 <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-label">关于我们</div>
+                        <div class="setting-value">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 15px; text-align: center;">
+                        <button class="btn btn-outline btn-block" style="color: #f44336; border-color: #f44336;">
+                            退出登录
+                        </button>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <div class="nav-item">
+                        <i class="fas fa-home"></i>
+                        <span>首页</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-tshirt"></i>
+                        <span>衣橱</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-heart"></i>
+                        <span>收藏</span>
+                    </div>
+                    <div class="nav-item active">
+                        <i class="fas fa-user"></i>
+                        <span>我的</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 添加衣物页面 -->
+        <div>
+            <div class="screen-title">添加衣物页面</div>
+            <div class="screen">
+                <div class="status-bar">
+                    <span>12:30</span>
+                    <div>
+                        <i class="fas fa-wifi"></i>
+                        <i class="fas fa-signal"></i>
+                        <i class="fas fa-battery-three-quarters"></i>
+                    </div>
+                </div>
+                <div class="header" style="background-color: #5E9FFF; position: relative; top: 0;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-arrow-left"></i>
+                        <div>添加衣物</div>
+                    </div>
+                    <div>保存</div>
+                </div>
+                <div class="content" style="padding: 15px;">
+                    <div style="background-color: #f0f0f0; height: 200px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 20px;">
+                        <i class="fas fa-camera" style="font-size: 36px; color: #999; margin-bottom: 10px;"></i>
+                        <div style="color: #666;">点击添加衣物照片</div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">衣物名称</label>
+                        <input type="text" placeholder="例如：白色长袖T恤" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">衣物类型</label>
+                        <select style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; background-color: white;">
+                            <option>上装 - T恤</option>
+                            <option>上装 - 衬衫</option>
+                            <option>上装 - 毛衣</option>
+                            <option>上装 - 外套</option>
+                            <option>下装 - 裤子</option>
+                            <option>下装 - 裙子</option>
+                            <option>鞋子</option>
+                            <option>配件</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">适合温度范围</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" placeholder="最低温度" style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;" value="15">
+                            <span>至</span>
+                            <input type="number" placeholder="最高温度" style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;" value="25">
+                            <span>°C</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">适合季节</label>
+                        <div style="display: flex; gap: 10px;">
+                            <div style="flex: 1; padding: 10px; border: 1px solid #5E9FFF; border-radius: 8px; text-align: center; color: #5E9FFF; background-color: rgba(94, 159, 255, 0.1);">春季</div>
+                            <div style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; color: #666;">夏季</div>
+                            <div style="flex: 1; padding: 10px; border: 1px solid #5E9FFF; border-radius: 8px; text-align: center; color: #5E9FFF; background-color: rgba(94, 159, 255, 0.1);">秋季</div>
+                            <div style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; color: #666;">冬季</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">适合天气</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                            <div style="padding: 8px 12px; border: 1px solid #5E9FFF; border-radius: 20px; text-align: center; color: #5E9FFF; background-color: rgba(94, 159, 255, 0.1); font-size: 14px;">
+                                <i class="fas fa-sun"></i> 晴天
+                            </div>
+                            <div style="padding: 8px 12px; border: 1px solid #5E9FFF; border-radius: 20px; text-align: center; color: #5E9FFF; background-color: rgba(94, 159, 255, 0.1); font-size: 14px;">
+                                <i class="fas fa-cloud"></i> 多云
+                            </div>
+                            <div style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 20px; text-align: center; color: #666; font-size: 14px;">
+                                <i class="fas fa-cloud-rain"></i> 雨天
+                            </div>
+                            <div style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 20px; text-align: center; color: #666; font-size: 14px;">
+                                <i class="fas fa-wind"></i> 大风
+                            </div>
+                            <div style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 20px; text-align: center; color: #666; font-size: 14px;">
+                                <i class="fas fa-snowflake"></i> 雪天
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">备注</label>
+                        <textarea placeholder="添加备注信息..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; height: 80px; resize: none;"></textarea>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-block">保存衣物</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 创建搭配页面 -->
+        <div>
+            <div class="screen-title">创建搭配页面</div>
+            <div class="screen">
+                <div class="status-bar">
+                    <span>12:30</span>
+                    <div>
+                        <i class="fas fa-wifi"></i>
+                        <i class="fas fa-signal"></i>
+                        <i class="fas fa-battery-three-quarters"></i>
+                    </div>
+                </div>
+                <div class="header" style="background-color: #5E9FFF; position: relative; top: 0;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-arrow-left"></i>
+                        <div>创建搭配</div>
+                    </div>
+                    <div>保存</div>
+                </div>
+                <div class="content" style="padding: 15px;">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">搭配名称</label>
+                        <input type="text" placeholder="例如：春季休闲搭配" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">适合天气</label>
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <div style="flex: 1; padding: 10px; border: 1px solid #5E9FFF; border-radius: 8px; text-align: center; color: #5E9FFF; background-color: rgba(94, 159, 255, 0.1);">
+                                <i class="fas fa-cloud-sun"></i>
+                                <div style="margin-top: 5px; font-size: 12px;">多云/晴</div>
+                            </div>
+                            <div style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; color: #666;">
+                                <i class="fas fa-cloud-rain"></i>
+                                <div style="margin-top: 5px; font-size: 12px;">雨天</div>
+                            </div>
+                            <div style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; color: #666;">
+                                <i class="fas fa-sun"></i>
+                                <div style="margin-top: 5px; font-size: 12px;">晴天</div>
+                            </div>
+                            <div style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; color: #666;">
+                                <i class="fas fa-snowflake"></i>
+                                <div style="margin-top: 5px; font-size: 12px;">雪天</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <span>温度范围:</span>
+                            <input type="number" placeholder="最低温度" style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;" value="15">
+                            <span>至</span>
+                            <input type="number" placeholder="最高温度" style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;" value="25">
+                            <span>°C</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <label style="font-weight: bold;">选择上装</label>
+                            <span style="color: #5E9FFF; font-size: 14px;">查看全部</span>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;">
+                            <div style="min-width: 100px; border: 2px solid #5E9FFF; border-radius: 8px; padding: 10px; text-align: center;">
+                                <i class="fas fa-tshirt" style="font-size: 36px; color: #5E9FFF; margin-bottom: 5px;"></i>
+                                <div style="font-size: 12px;">白色长袖T恤</div>
+                            </div>
+                            <div style="min-width: 100px; border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center;">
+                                <i class="fas fa-tshirt" style="font-size: 36px; color: #666; margin-bottom: 5px;"></i>
+                                <div style="font-size: 12px;">蓝色牛津衬衫</div>
+                            </div>
+                            <div style="min-width: 100px; border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center;">
+                                <i class="fas fa-tshirt" style="font-size: 36px; color: #666; margin-bottom: 5px;"></i>
+                                <div style="font-size: 12px;">灰色针织衫</div>
+                            </div>
+                            <div style="min-width: 100px; border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center;">
+                                <i class="fas fa-plus" style="font-size: 36px; color: #999; margin-bottom: 5px;"></i>
+                                <div style="font-size: 12px;">添加上装</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <label style="font-weight: bold;">选择下装</label>
+                            <span style="color: #5E9FFF; font-size: 14px;">查看全部</span>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;">
+                            <div style="min-width: 100px; border: 2px solid #5E9FFF; border-radius: 8px; padding: 10px; text-align: center;">
+                                <i class="fas fa-socks" style="font-size: 36px; color: #5E9FFF; margin-bottom: 5px;"></i>
+                                <div style="font-size: 12px;">蓝色牛仔裤</div>
+                            </div>
+                            <div style="min-width: 100px; border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center;">
+                                <i class="fas fa-socks" style="font-size: 36px; color: #666; margin-bottom: 5px;"></i>
+                                <div style="font-size: 12px;">卡其色休闲裤</div>
+                            </div>
+                            <div style="min-width: 100px; border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center;">
+                                <i class="fas fa-socks" style="font-size: 36px; color: #666; margin-bottom: 5px;"></i>
+                                <div style="font-size: 12px;">黑色长裤</div>
+                            </div>
+                            <div style="min-width: 100px; border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center;">
+                                <i class="fas fa-plus" style="font-size: 36px; color: #999; margin-bottom: 5px;"></i>
+                                <div style="font-size: 12px;">添加下装</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <label style="font-weight: bold;">选择鞋子</label>
+                            <span style="color: #5E9FFF; font-size: 14px;">查看全部</span>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;">
+                            <div style="min-width: 100px; border: 2px solid #5E9FFF; border-radius: 8px; padding: 10px; text-align: center;">
+                                <i class="fas fa-shoe-prints" style="font-size: 36px; color: #5E9FFF; margin-bottom: 5px;"></i>
+                                <div style="font-size: 12px;">白色运动鞋</div>
+                            </div>
+                            <div style="min-width: 100px; border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center;">
+                                <i class="fas fa-shoe-prints" style="font-size: 36px; color: #666; margin-bottom: 5px;"></i>
+                                <div style="font-size: 12px;">棕色休闲鞋</div>
+                            </div>
+                            <div style="min-width: 100px; border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center;">
+                                <i class="fas fa-plus" style="font-size: 36px; color: #999; margin-bottom: 5px;"></i>
+                                <div style="font-size: 12px;">添加鞋子</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <label style="font-weight: bold;">选择配件</label>
+                            <span style="color: #5E9FFF; font-size: 14px;">查看全部</span>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;">
+                            <div style="min-width: 100px; border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center;">
+                                <i class="fas fa-glasses" style="font-size: 36px; color: #666; margin-bottom: 5px;"></i>
+                                <div style="font-size: 12px;">墨镜</div>
+                            </div>
+                            <div style="min-width: 100px; border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center;">
+                                <i class="fas fa-hat-cowboy" style="font-size: 36px; color: #666; margin-bottom: 5px;"></i>
+                                <div style="font-size: 12px;">棒球帽</div>
+                            </div>
+                            <div style="min-width: 100px; border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center;">
+                                <i class="fas fa-plus" style="font-size: 36px; color: #999; margin-bottom: 5px;"></i>
+                                <div style="font-size: 12px;">添加配件</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">搭配备注</label>
+                        <textarea placeholder="添加搭配备注信息..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; height: 80px; resize: none;"></textarea>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-block">保存搭配</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 天气预警页面 -->
+        <div>
+            <div class="screen-title">天气预警页面</div>
+            <div class="screen">
+                <div class="status-bar">
+                    <span>12:30</span>
+                    <div>
+                        <i class="fas fa-wifi"></i>
+                        <i class="fas fa-signal"></i>
+                        <i class="fas fa-battery-three-quarters"></i>
+                    </div>
+                </div>
+                <div class="header" style="background-color: #FF5722; position: relative; top: 0;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-arrow-left"></i>
+                        <div>天气预警</div>
+                    </div>
+                    <div style="display: flex; gap: 15px;">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                </div>
+                <div class="content" style="padding: 0;">
+                    <div style="background-color: #FF5722; color: white; padding: 20px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 36px; margin-right: 15px;"></i>
+                            <div>
+                                <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">强降雨预警</div>
+                                <div style="font-size: 14px; opacity: 0.8;">今日 12:00 发布</div>
+                            </div>
+                        </div>
+                        <p style="line-height: 1.6; margin-bottom: 15px;">
+                            预计未来6小时内本市将出现强降雨天气，局部地区可能伴有雷电和大风，请注意防范。
+                        </p>
+                        <div style="display: flex; gap: 10px;">
+                            <button style="flex: 1; background-color: rgba(255, 255, 255, 0.2); border: none; color: white; padding: 8px 0; border-radius: 4px; font-size: 14px;">查看详情</button>
+                            <button style="flex: 1; background-color: rgba(255, 255, 255, 0.2); border: none; color: white; padding: 8px 0; border-radius: 4px; font-size: 14px;">我知道了</button>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 15px;">
+                        <h3 style="margin-bottom: 15px;">穿衣建议</h3>
+                        <div class="card" style="margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                                <i class="fas fa-umbrella" style="font-size: 24px; color: #5E9FFF; margin-right: 15px;"></i>
+                                <div>
+                                    <div style="font-weight: bold; margin-bottom: 5px;">雨天穿搭建议</div>
+                                    <div style="font-size: 14px; color: #666;">今天有强降雨，建议做好防雨准备</div>
+                                </div>
+                            </div>
+                            
+                            <div class="clothing-item" style="padding: 10px 0;">
+                                <div class="clothing-icon">
+                                    <i class="fas fa-tshirt"></i>
+                                </div>
+                                <div class="clothing-info">
+                                    <div class="clothing-name">上衣</div>
+                                    <div class="clothing-desc">防水外套或带帽衣物</div>
+                                </div>
+                            </div>
+                            
+                            <div class="clothing-item" style="padding: 10px 0;">
+                                <div class="clothing-icon">
+                                    <i class="fas fa-socks"></i>
+                                </div>
+                                <div class="clothing-info">
+                                    <div class="clothing-name">下装</div>
+                                    <div class="clothing-desc">避免穿着浅色或容易湿透的裤子</div>
+                                </div>
+                            </div>
+                            
+                            <div class="clothing-item" style="padding: 10px 0; border-bottom: none;">
+                                <div class="clothing-icon">
+                                    <i class="fas fa-shoe-prints"></i>
+                                </div>
+                                <div class="clothing-info">
+                                    <div class="clothing-name">鞋子</div>
+                                    <div class="clothing-desc">防水鞋或雨靴</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin-bottom: 15px;">必备物品</h3>
+                        <div class="card">
+                            <div class="clothing-item" style="padding: 10px 0;">
+                                <div class="clothing-icon">
+                                    <i class="fas fa-umbrella"></i>
+                                </div>
+                                <div class="clothing-info">
+                                    <div class="clothing-name">雨伞</div>
+                                    <div class="clothing-desc">建议携带结实的雨伞</div>
+                                </div>
+                            </div>
+                            
+                            <div class="clothing-item" style="padding: 10px 0;">
+                                <div class="clothing-icon">
+                                    <i class="fas fa-tint-slash"></i>
+                                </div>
+                                <div class="clothing-info">
+                                    <div class="clothing-name">防水袋</div>
+                                    <div class="clothing-desc">保护电子设备和重要物品</div>
+                                </div>
+                            </div>
+                            
+                            <div class="clothing-item" style="padding: 10px 0; border-bottom: none;">
+                                <div class="clothing-icon">
+                                    <i class="fas fa-bolt"></i>
+                                </div>
+                                <div class="clothing-info">
+                                    <div class="clothing-name">注意事项</div>
+                                    <div class="clothing-desc">避免在雷电天气使用金属物品，远离高大建筑物和树木</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
