@@ -2,10 +2,10 @@
 
 版本控制和Git入门
 使用命令行进行版本控制
-GitHub和远程仓库
+GitHub和\
 GitHub私有仓库现已免费！
-Git忽略文件配置（Gitignore）
+Git忽略文件配
 克隆仓库
 分支与合并
 使用Xcode进行源代码控制
-复刻（Fork）和拉取请求（Pull Request）
+复刻（Fork）
